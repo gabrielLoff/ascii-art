@@ -133,6 +133,36 @@ def test_ascii_url_download_fails() -> None:
     assert result.exit_code != 0
 
 
+def test_ascii_mode_linear_explicit(gradient_png: Path) -> None:
+    result = runner.invoke(app, ["ascii", str(gradient_png), "--mode", "linear"])
+    assert result.exit_code == 0
+
+
+def test_ascii_mode_edge(gradient_png: Path) -> None:
+    result = runner.invoke(app, ["ascii", str(gradient_png), "--mode", "edge"])
+    assert result.exit_code == 0
+
+
+def test_ascii_mode_threshold(gradient_png: Path) -> None:
+    result = runner.invoke(app, ["ascii", str(gradient_png), "--mode", "threshold"])
+    assert result.exit_code == 0
+
+
+def test_ascii_mode_color_to_char(gradient_png: Path) -> None:
+    result = runner.invoke(app, ["ascii", str(gradient_png), "--mode", "color-to-char"])
+    assert result.exit_code == 0
+
+
+def test_ascii_mode_invalid(gradient_png: Path) -> None:
+    result = runner.invoke(app, ["ascii", str(gradient_png), "--mode", "invalid"])
+    assert result.exit_code != 0
+
+
+def test_ascii_mode_with_theme(gradient_png: Path) -> None:
+    result = runner.invoke(app, ["ascii", str(gradient_png), "--mode", "edge", "--theme", "eighths"])
+    assert result.exit_code == 0
+
+
 def test_default_width_returns_terminal_columns() -> None:
     import os
     from unittest.mock import patch

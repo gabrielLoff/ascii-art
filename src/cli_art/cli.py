@@ -11,6 +11,9 @@ from .themes import THEMES, resolve_chars, theme_names
 app = typer.Typer()
 
 
+_MODES = ["linear", "edge", "threshold", "color-to-char"]
+
+
 def _complete_theme(
     ctx: typer.Context,
     incomplete: str,
@@ -19,6 +22,15 @@ def _complete_theme(
     if incomplete:
         return [n for n in names if n.startswith(incomplete)]
     return names
+
+
+def _complete_mode(
+    ctx: typer.Context,
+    incomplete: str,
+) -> list[str]:
+    if incomplete:
+        return [m for m in _MODES if m.startswith(incomplete)]
+    return list(_MODES)
 
 
 @contextmanager
@@ -70,6 +82,12 @@ def ascii(
         help="Named character ramp theme. Cannot be combined with --chars. "
              "Use 'cli_art themes' to list available themes.",
     ),
+    mode: str = typer.Option(
+        "linear",
+        "--mode",
+        autocompletion=_complete_mode,
+        help="Character mapping mode: linear, edge, threshold, color-to-char",
+    ),
 ) -> None:
     """Convert an image to color ASCII art."""
     if chars is not None and len(chars) == 0:
@@ -82,7 +100,7 @@ def ascii(
 
     try:
         with _resolve_image(source) as local_path:
-            grid = image_to_ascii_grid(local_path, width=width, invert=invert, chars=active_chars)
+            grid = image_to_ascii_grid(local_path, width=width, invert=invert, chars=active_chars, mode=mode)
     except DownloadError as e:
         raise typer.BadParameter(str(e))
 

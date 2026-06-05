@@ -2,6 +2,8 @@ from pathlib import Path
 
 from PIL import Image
 
+from . import modes
+
 CHARS = " .:-=+*#%@"
 
 AsciiGrid = list[list[tuple[str, tuple[int, int, int]]]]
@@ -12,6 +14,7 @@ def image_to_ascii_grid(
     width: int = 80,
     invert: bool = False,
     chars: str | None = None,
+    mode: str = "linear",
 ) -> AsciiGrid:
     active = chars if chars is not None else CHARS
     if invert:
@@ -22,19 +25,17 @@ def image_to_ascii_grid(
     aspect_ratio = orig_h / orig_w
     height = int(width * aspect_ratio * 0.45)
     img = img.resize((width, height))
-    pixels = img.load()
 
-    grid: AsciiGrid = []
-    for y in range(height):
-        row: list[tuple[str, tuple[int, int, int]]] = []
-        for x in range(width):
-            r, g, b = pixels[x, y]
-            brightness = (r + g + b) / 3
-            char_idx = int(brightness / 255 * (len(active) - 1))
-            row.append((active[char_idx], (r, g, b)))
-        grid.append(row)
-
-    return grid
+    MODES = {
+        "linear": modes.linear_map,
+        "edge": modes.edge_map,
+        "threshold": modes.threshold_map,
+        "color-to-char": modes.hue_map,
+    }
+    mapper = MODES.get(mode)
+    if mapper is None:
+        raise ValueError(f"Unknown mapping mode: {mode!r}")
+    return mapper(img, active)
 
 
 def render_ansi(grid: AsciiGrid) -> str:

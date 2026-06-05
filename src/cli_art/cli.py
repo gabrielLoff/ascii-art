@@ -2,8 +2,6 @@ import shutil
 from contextlib import contextmanager
 from pathlib import Path
 from collections.abc import Iterator
-from typing import Optional
-
 import typer
 
 from .ascii import CHARS, image_to_ascii_grid, render_ansi, render_html, render_svg
@@ -53,19 +51,19 @@ def _default_width() -> int:
 def ascii(
     source: str = typer.Argument(..., help="Path or URL of the image"),
     width: int = typer.Option(_default_width, "--width", "-w", help="Output width in characters"),
-    output: Optional[Path] = typer.Option(
+    output: Path | None = typer.Option(
         None, "--output", "-o", help="Save to file (.html / .svg for those formats, otherwise ANSI text)"
     ),
     invert: bool = typer.Option(
         False, "--invert", help="Invert brightness mapping"
     ),
-    chars: Optional[str] = typer.Option(
+    chars: str | None = typer.Option(
         None,
         "--chars",
         help="Custom character ramp for brightness mapping "
              "(from dark to bright). Default: ' .:-=+*#%@'",
     ),
-    theme: Optional[str] = typer.Option(
+    theme: str | None = typer.Option(
         None,
         "--theme",
         autocompletion=_complete_theme,

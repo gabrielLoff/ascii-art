@@ -4,7 +4,7 @@ import io
 import tempfile
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Iterator
+from collections.abc import Iterator
 
 _URL_PREFIXES = ("http://", "https://")
 MAX_DOWNLOAD_SIZE = 10 * 1024 * 1024

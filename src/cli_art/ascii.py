@@ -4,13 +4,15 @@ from PIL import Image
 
 CHARS = " .:-=+*#%@"
 
+AsciiGrid = list[list[tuple[str, tuple[int, int, int]]]]
+
 
 def image_to_ascii_grid(
     path: str | Path,
     width: int = 80,
     invert: bool = False,
     chars: str | None = None,
-) -> list[list[tuple[str, tuple[int, int, int]]]]:
+) -> AsciiGrid:
     active = chars if chars is not None else CHARS
     if invert:
         active = active[::-1]
@@ -20,12 +22,13 @@ def image_to_ascii_grid(
     aspect_ratio = orig_h / orig_w
     height = int(width * aspect_ratio * 0.45)
     img = img.resize((width, height))
+    pixels = img.load()
 
-    grid: list[list[tuple[str, tuple[int, int, int]]]] = []
+    grid: AsciiGrid = []
     for y in range(height):
         row: list[tuple[str, tuple[int, int, int]]] = []
         for x in range(width):
-            r, g, b = img.getpixel((x, y))
+            r, g, b = pixels[x, y]
             brightness = (r + g + b) / 3
             char_idx = int(brightness / 255 * (len(active) - 1))
             row.append((active[char_idx], (r, g, b)))
@@ -34,7 +37,7 @@ def image_to_ascii_grid(
     return grid
 
 
-def render_ansi(grid: list[list[tuple[str, tuple[int, int, int]]]]) -> str:
+def render_ansi(grid: AsciiGrid) -> str:
     lines: list[str] = []
     for row in grid:
         line = ""
@@ -48,7 +51,7 @@ def _escape_xml(s: str) -> str:
     return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
-def render_svg(grid: list[list[tuple[str, tuple[int, int, int]]]]) -> str:
+def render_svg(grid: AsciiGrid) -> str:
     if not grid or not grid[0]:
         return (
             '<?xml version="1.0" encoding="utf-8"?>\n'
@@ -83,7 +86,7 @@ def render_svg(grid: list[list[tuple[str, tuple[int, int, int]]]]) -> str:
     return "\n".join(lines)
 
 
-def render_html(grid: list[list[tuple[str, tuple[int, int, int]]]]) -> str:
+def render_html(grid: AsciiGrid) -> str:
     lines = [
         '<!DOCTYPE html>',
         '<html>',

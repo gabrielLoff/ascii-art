@@ -20,9 +20,6 @@ Python 3.10 goes EOL in October 2026. Python 3.11 is ~25% faster on average, and
 
 ## Code Quality & Type Safety
 
-### Unused variable `tmp` in `download.py:67`
-`tmp` is assigned from `tempfile.NamedTemporaryFile(...)` but never referenced after the two method calls. Either remove the assignment or use a context manager.
-
 ### Missing error wrapping for invalid local images
 If `Image.open()` fails on a corrupt local file, the raw PIL exception propagates to the user (URL downloads get nice `DownloadError` wrapping). Wrap in try/except and raise a typed error.
 

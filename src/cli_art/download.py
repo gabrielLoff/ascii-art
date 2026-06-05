@@ -64,10 +64,9 @@ def download_image(url: str, max_size: int = MAX_DOWNLOAD_SIZE) -> Iterator[Path
         raise DownloadError(f"Downloaded content is not a valid image: {e}") from e
 
     buf.seek(0)
-    tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".img")
-    tmp.write(buf.read())
-    tmp.close()
-    path = Path(tmp.name)
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".img") as tmp:
+        tmp.write(buf.read())
+        path = Path(tmp.name)
     try:
         yield path
     finally:

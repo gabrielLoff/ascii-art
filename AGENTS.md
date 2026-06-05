@@ -10,6 +10,12 @@ python -m cli_art                  # Run via module
 pytest -v                          # Run tests
 ```
 
+## Git & Branching
+
+- Every feature must be developed on a new branch with the prefix `feature/` (e.g. `feature/add-rainbow-theme`).
+- Merges to `main` are done exclusively via GitHub Pull Request — never push directly to `main`.
+- Before opening a PR, run `pytest -v` and ensure all tests pass.
+
 ## Available Subagents
 
 - **`debugger`** — **MUST** use this when you encounter any error (runtime, test failure, type/lint error, unexpected behavior). Do NOT attempt to fix errors directly. It reproduces, diagnoses, and fixes the problem, asking for input when unsure.

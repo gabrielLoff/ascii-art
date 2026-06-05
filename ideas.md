@@ -1,20 +1,50 @@
 # Future Feature Ideas
 
-## URL Input Support
-**Accept a URL as the image path (auto-download before processing).**
+## Plain ASCII Output (`--no-color`)
+**Add a flag to output clean, shareable plain text without ANSI color codes.**
 
-`cli_art ascii https://example.com/photo.jpg` would fetch the image, convert it, and display the result.
+**Why:** Enables use in markdown code blocks, READMEs, terminals without true color support, or any environment where ANSI codes are unwanted.
 
-**Why:** Removes the friction of manually downloading images. Many fun use cases (profile pics, memes).
+**Approach:**
+- Add `--no-color` / `--plain` flag to the `ascii` command
+- Add a `render_plain()` function in `ascii.py` that outputs characters only (no ANSI escapes)
+- When `--no-color` is set, call `render_plain()` instead of `render_ansi()`
 
-**Approach:** Detect URL pattern in the `image_path` argument, download to a temp file using `urllib` (stdlib, no extra deps), process as normal, clean up temp file.
+---
 
-**Considerations:**
-- Need to distinguish URLs from local paths (check for `http://` or `https://` prefix)
-- Use `urllib.request` from stdlib to avoid adding `requests` as a dependency
-- Handle network errors gracefully (timeout, connection errors)
-- Clean up temp file even on errors (use `tempfile.NamedTemporaryFile` or a try/finally block)
-- File size limits? Could set a reasonable max (e.g., 10MB)
+## More Character Themes
+**Expand the theme collection with additional creative ramps.**
+
+**Suggested themes:**
+- **Braille** — ` ⠀⠁⠂⠄⡀⢀⠠⠐⠈⠘⠨⠰⠱⠲⠶⠷⠿` (high resolution, pure ASCII)
+- **Shade blocks** — ` ░▒▓█` (simple and bold)
+- **Classic** — ` .,:;i1IlLCH$@#` (classic ASCII-art ramp)
+- **Numerical** — ` 123456789` (unexpected but fun)
+
+---
+
+## SVG Output
+**Generate scalable vector ASCII art as SVG.**
+
+**Why:** SVG output is scalable, copyable, and embeddable in presentations, websites, or design tools — unlike HTML `<pre>` output which is tied to specific font sizing.
+
+**Approach:**
+- Add a new output format (detected via `--output file.svg`)
+- Generate SVG with `<text>` elements and precise positioning
+- Use `<tspan>` or individual `<text>` nodes for each character with its color
+
+---
+
+## Animated GIF Support
+**Convert animated GIFs into frame-by-frame ASCII animations.**
+
+**Why:** GIFs become dynamic, impressive ASCII art — high fun factor and shareability.
+
+**Approach:**
+- Extract frames using Pillow (iterate over `n_frames`)
+- Convert each frame to ASCII grid
+- Output as ANSI animation (clear screen between frames with delay) or as an HTML page with JS frame cycling
+- Could live as a separate subcommand: `cli_art animate`
 
 ---
 

@@ -192,3 +192,32 @@ def test_ascii_url_download_fails() -> None:
     with patch("urllib.request.urlopen", side_effect=urllib.error.URLError("Connection refused")):
         result = runner.invoke(app, ["ascii", "https://example.com/test.png"])
     assert result.exit_code != 0
+
+
+def test_default_width_returns_terminal_columns() -> None:
+    import os
+    from unittest.mock import patch
+
+    from cli_art.cli import _default_width
+
+    cases = [
+        (os.terminal_size((120, 24)), 120),
+        (os.terminal_size((80, 24)), 80),
+        (os.terminal_size((200, 50)), 200),
+    ]
+    for size, expected in cases:
+        with patch("shutil.get_terminal_size", return_value=size):
+            assert _default_width() == expected
+
+
+def test_explicit_width_overrides_default(tmp_path: Path) -> None:
+    img = Image.new("RGB", (100, 20), color=(255, 0, 0))
+    img_path = tmp_path / "test.png"
+    img.save(img_path)
+
+    result_wide = runner.invoke(app, ["ascii", str(img_path), "--width", "120"])
+    result_narrow = runner.invoke(app, ["ascii", str(img_path), "--width", "20"])
+
+    assert result_wide.exit_code == 0
+    assert result_narrow.exit_code == 0
+    assert len(result_wide.stdout) > len(result_narrow.stdout)

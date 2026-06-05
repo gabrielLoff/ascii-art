@@ -2,10 +2,8 @@
 
 ## Dependencies & Python Version
 
-### Consider bumping to `requires-python = ">=3.11"`
-Python 3.10 goes EOL in October 2026. Python 3.11 is ~25% faster on average, and `tomllib` (for future config file support) is stdlib in 3.11+.
-
-**Risk:** Drops 3.10 users (minor at this point).
+### `tomli` conditional dependency for Python < 3.11
+`tomli>=2.0.0` is required only when `python_version < '3.11'`. This is handled cleanly via a PEP 508 conditional dependency and a `try/except ImportError` in `config.py`. If Python 3.10 support is ever dropped, `tomli` can be removed from dependencies entirely.
 
 ---
 

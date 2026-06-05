@@ -5,6 +5,7 @@ from collections.abc import Iterator
 import typer
 
 from .ascii import CHARS, image_to_ascii_grid, render_ansi, render_html, render_plain, render_svg
+from .config import load_config
 from .download import DownloadError, download_image, is_url
 from .themes import THEMES, resolve_chars, theme_names
 
@@ -62,12 +63,12 @@ def _default_width() -> int:
 @app.command()
 def ascii(
     source: str = typer.Argument(..., help="Path or URL of the image"),
-    width: int = typer.Option(_default_width, "--width", "-w", help="Output width in characters"),
+    width: int | None = typer.Option(None, "--width", "-w", help="Output width in characters (default: terminal width, fallback 80)"),
     output: Path | None = typer.Option(
         None, "--output", "-o", help="Save to file (.html / .svg for those formats, otherwise ANSI text)"
     ),
-    invert: bool = typer.Option(
-        False, "--invert", help="Invert brightness mapping"
+    invert: bool | None = typer.Option(
+        None, "--invert/--no-invert", help="Invert brightness mapping"
     ),
     chars: str | None = typer.Option(
         None,
@@ -82,19 +83,28 @@ def ascii(
         help="Named character ramp theme. Cannot be combined with --chars. "
              "Use 'cli_art themes' to list available themes.",
     ),
-    mode: str = typer.Option(
-        "linear",
+    mode: str | None = typer.Option(
+        None,
         "--mode",
         autocompletion=_complete_mode,
-        help="Character mapping mode: linear, edge, threshold, color-to-char",
+        help="Character mapping mode: linear, edge, threshold, color-to-char (default: linear)",
     ),
-    no_color: bool = typer.Option(
-        False,
-        "--no-color",
+    no_color: bool | None = typer.Option(
+        None,
+        "--no-color/--color",
         help="Output plain text without ANSI color codes",
     ),
 ) -> None:
     """Convert an image to color ASCII art."""
+    config = load_config()
+
+    width = width if width is not None else config.get("width", _default_width())
+    invert = invert if invert is not None else config.get("invert", False)
+    no_color = no_color if no_color is not None else config.get("no_color", False)
+    chars = chars if chars is not None else config.get("chars")
+    theme = theme if theme is not None else config.get("theme")
+    mode = mode if mode is not None else config.get("mode", "linear")
+
     if chars is not None and len(chars) == 0:
         raise typer.BadParameter("--chars must not be an empty string")
 

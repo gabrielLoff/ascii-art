@@ -18,23 +18,6 @@
 
 ---
 
-## Config File (`~/.config/cli-art/config.toml`)
-**Persist user preferences via a TOML config file.**
-
-**Why:** Users who always use the same theme, width, or flags have to type them every time. A config file would persist defaults.
-
-**Approach:**
-- Read `~/.config/cli-art/config.toml` on startup using `tomllib` (stdlib in Python 3.11+, or `tomli` for older versions)
-- `[defaults]` section with `width`, `theme`, `invert`, etc.
-- CLI flags always override config values
-- Keep it optional — no config = current behavior
-
-**Considerations:**
-- Adds another file to document and manage
-- CLI flags must take precedence over config
-
----
-
 ## Text Overlay / Caption (`--caption`)
 **Add a caption below or overlaid on the ASCII art.**
 

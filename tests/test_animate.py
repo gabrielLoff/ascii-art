@@ -163,3 +163,34 @@ def test_animate_invert(two_frame_gif: Path) -> None:
     with patch("time.sleep"):
         result = runner.invoke(app, ["animate", str(two_frame_gif), "--invert"])
     assert result.exit_code == 0
+
+
+def test_animate_palette_two(two_frame_gif: Path) -> None:
+    with patch("time.sleep"):
+        result = runner.invoke(app, ["animate", str(two_frame_gif), "--palette", "2"])
+    assert result.exit_code == 0
+
+
+def test_animate_palette_file(tmp_path: Path, two_frame_gif: Path) -> None:
+    ref = tmp_path / "ref.png"
+    Image.new("RGB", (4, 1), (255, 0, 0)).save(ref)
+    with patch("time.sleep"):
+        result = runner.invoke(
+            app, ["animate", str(two_frame_gif), "--palette-file", str(ref)]
+        )
+    assert result.exit_code == 0
+
+
+def test_animate_palette_file_not_found(two_frame_gif: Path) -> None:
+    result = runner.invoke(
+        app, ["animate", str(two_frame_gif), "--palette-file", "/nonexistent/ref.png"]
+    )
+    assert result.exit_code != 0
+
+
+def test_animate_palette_with_theme(two_frame_gif: Path) -> None:
+    with patch("time.sleep"):
+        result = runner.invoke(
+            app, ["animate", str(two_frame_gif), "--palette", "4", "--theme", "eighths"]
+        )
+    assert result.exit_code == 0

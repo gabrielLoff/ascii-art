@@ -5,7 +5,7 @@ from typing import Any
 
 from PIL import Image
 
-from .ascii import CHARS, AsciiGrid, _escape_xml, _image_to_grid, render_ansi, render_plain
+from .ascii import CHARS, AsciiGrid, _apply_palette, _escape_xml, _image_to_grid, render_ansi, render_plain
 
 
 def extract_frames(path: str | Path, max_frames: int = 500) -> list[tuple[Image.Image, int]]:
@@ -38,10 +38,13 @@ def frames_to_grids(
     width: int,
     active: str,
     mode: str,
+    palette: int | None = None,
+    palette_file: str | Path | None = None,
 ) -> list[tuple[AsciiGrid, int]]:
     result: list[tuple[AsciiGrid, int]] = []
     for frame, delay in frames:
-        grid = _image_to_grid(frame, width, active, mode)
+        reduced = _apply_palette(frame, palette=palette, palette_file=palette_file)
+        grid = _image_to_grid(reduced, width, active, mode)
         result.append((grid, delay))
     return result
 

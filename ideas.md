@@ -16,7 +16,9 @@
 - Output character changes — some may prefer the clean "posterized" look
 - Best as opt-in, not default
 
----## Text Overlay / Caption (`--caption`)
+---
+
+## Text Overlay / Caption (`--caption`)
 **Add a caption below or overlaid on the ASCII art.**
 
 **Why:** Turns an image into a meme-style ASCII with a caption — high fun factor for sharing.
@@ -30,7 +32,7 @@
 - Slightly opinionated — could be a separate command (`cli_art caption`)
 - Caption should use the same character ramp/color treatment
 
-
+---
 
 ## Aspect Ratio Control (`--aspect`)
 **Let users override the automatic height calculation.**
@@ -52,7 +54,6 @@ Currently height = `width * aspect_ratio * 0.45` (hardcoded font aspect correcti
 - Could also add `--height` for explicit row count
 
 ---
-
 
 ## Batch / Directory Processing (`cli_art batch`)
 **Convert an entire directory of images to ASCII art in one command.**

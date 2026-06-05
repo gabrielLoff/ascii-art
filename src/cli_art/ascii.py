@@ -40,10 +40,10 @@ def image_to_ascii_grid(
 def render_ansi(grid: AsciiGrid) -> str:
     lines: list[str] = []
     for row in grid:
-        line = ""
-        for char, (r, g, b) in row:
-            line += f"\033[38;2;{r};{g};{b}m{char}\033[0m"
-        lines.append(line)
+        lines.append("".join(
+            f"\033[38;2;{r};{g};{b}m{char}\033[0m"
+            for char, (r, g, b) in row
+        ))
     return "\n".join(lines)
 
 
@@ -95,10 +95,10 @@ def render_html(grid: AsciiGrid) -> str:
         '<pre style="color:#fff;line-height:1;font-size:6px;letter-spacing:0;">',
     ]
     for row in grid:
-        line = ""
-        for char, (r, g, b) in row:
-            line += f'<span style="color:rgb({r},{g},{b})">{char}</span>'
-        lines.append(line)
+        lines.append("".join(
+            f'<span style="color:rgb({r},{g},{b})">{char}</span>'
+            for char, (r, g, b) in row
+        ))
     lines.append("</pre>")
     lines.append("</body>")
     lines.append("</html>")

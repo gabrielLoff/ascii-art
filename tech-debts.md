@@ -2,11 +2,6 @@
 
 ## Performance
 
-### String concatenation in render loops → `''.join()`
-`render_ansi`, `render_html`, and `render_svg` build lines via `line += f'...'` inside a loop. Use `''.join(...)` with a generator expression for each row, then `'\n'.join()` for all rows.
-
-**Benefit:** ~10–20% faster rendering for large outputs.
-
 ---
 
 ## Dependencies & Python Version

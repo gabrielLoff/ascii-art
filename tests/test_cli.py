@@ -214,6 +214,62 @@ def test_default_width_returns_terminal_columns() -> None:
             assert _default_width() == expected
 
 
+def test_render_svg_basic() -> None:
+    from cli_art.ascii import render_svg
+
+    grid = [
+        [("@", (255, 0, 0)), ("#", (0, 255, 0))],
+        [(".", (0, 0, 255)), (" ", (128, 128, 128))],
+    ]
+    svg = render_svg(grid)
+    assert svg.startswith('<?xml')
+    assert '<svg' in svg
+    assert '</svg>' in svg
+    assert 'rgb(255,0,0)' in svg
+    assert 'rgb(0,255,0)' in svg
+    assert 'rgb(0,0,255)' in svg
+    assert 'monospace' in svg
+    assert '#000' in svg
+
+
+def test_render_svg_empty_grid() -> None:
+    from cli_art.ascii import render_svg
+
+    svg = render_svg([])
+    assert '<svg' in svg
+    assert '</svg>' in svg
+
+
+def test_render_svg_xml_escaping() -> None:
+    from cli_art.ascii import render_svg
+
+    grid = [[("<", (255, 0, 0)), (">", (0, 0, 0)), ("&", (128, 128, 128))]]
+    svg = render_svg(grid)
+    assert "&lt;" in svg
+    assert "&gt;" in svg
+    assert "&amp;" in svg
+
+
+def test_ascii_svg_output(tmp_path: Path) -> None:
+    img = Image.new("RGB", (30, 10), color=(255, 0, 0))
+    for x in range(30):
+        for y in range(10):
+            img.putpixel((x, y), (int(x / 30 * 255), int(y / 10 * 255), 128))
+    img_path = tmp_path / "test.png"
+    img.save(img_path)
+
+    out_svg = tmp_path / "out.svg"
+    result = runner.invoke(app, ["ascii", str(img_path), "--output", str(out_svg)])
+    assert result.exit_code == 0
+    assert out_svg.exists()
+    assert out_svg.stat().st_size > 0
+
+    content = out_svg.read_text(encoding="utf-8")
+    assert '<svg' in content
+    assert '</svg>' in content
+    assert 'monospace' in content
+
+
 def test_explicit_width_overrides_default(tmp_path: Path) -> None:
     img = Image.new("RGB", (100, 20), color=(255, 0, 0))
     img_path = tmp_path / "test.png"

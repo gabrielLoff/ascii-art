@@ -16,6 +16,10 @@
     "feature-architect": {
       "description": "Plans implementation of new features from a technical perspective, analyzing trade-offs and presenting options.",
       "mode": "subagent"
+    },
+    "innovator": {
+      "description": "Suggests technological improvements, refactoring, performance optimizations, and architectural evolution. Use when you want to improve code health or modernize the stack.",
+      "mode": "subagent"
     }
   }
 }

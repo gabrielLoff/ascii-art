@@ -26,6 +26,7 @@ pytest -v                          # Run tests
 - **`consultant`** — use this before committing changes or when you want a fresh code review. It reads code without context and reports on clarity, structure, and convention compliance.
 - **`creative`** — use this when you want suggestions for new features or evolutions of existing features. It reads the project and presents ideas for you to validate — it never implements anything.
 - **`feature-architect`** — use this after a feature is proposed but before implementation. It reads the project and produces structured implementation plans with technical trade-offs, pros/cons, and effort estimates.
+- **`innovator`** — use this when you want to improve code health, performance, or modernize the stack. It reads the project and suggests technical improvements without changing anything.
 
 ## Project Architecture
 

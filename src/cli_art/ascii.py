@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from pathlib import Path
 
 from PIL import Image
@@ -11,6 +12,14 @@ AsciiGrid = list[list[tuple[str, tuple[int, int, int]]]]
 
 class ImageError(Exception):
     """Raised when the image file is corrupt or cannot be opened."""
+
+
+_MODES: dict[str, Callable[[Image.Image, str], modes.AsciiGrid]] = {
+    "linear": modes.linear_map,
+    "edge": modes.edge_map,
+    "threshold": modes.threshold_map,
+    "color-to-char": modes.hue_map,
+}
 
 
 def _apply_palette(
@@ -46,13 +55,7 @@ def _image_to_grid(
     height = int(width * aspect_ratio * 0.45)
     img = img.resize((width, height))
 
-    MODES = {
-        "linear": modes.linear_map,
-        "edge": modes.edge_map,
-        "threshold": modes.threshold_map,
-        "color-to-char": modes.hue_map,
-    }
-    mapper = MODES.get(mode)
+    mapper = _MODES.get(mode)
     if mapper is None:
         raise ValueError(f"Unknown mapping mode: {mode!r}")
     return mapper(img, active)

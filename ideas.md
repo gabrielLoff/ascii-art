@@ -16,9 +16,7 @@
 - Output character changes — some may prefer the clean "posterized" look
 - Best as opt-in, not default
 
----
-
-## Text Overlay / Caption (`--caption`)
+---## Text Overlay / Caption (`--caption`)
 **Add a caption below or overlaid on the ASCII art.**
 
 **Why:** Turns an image into a meme-style ASCII with a caption — high fun factor for sharing.
@@ -32,20 +30,7 @@
 - Slightly opinionated — could be a separate command (`cli_art caption`)
 - Caption should use the same character ramp/color treatment
 
----
 
-## Animated GIF Support
-**Convert animated GIFs into frame-by-frame ASCII animations.**
-
-**Why:** GIFs become dynamic, impressive ASCII art — high fun factor and shareability.
-
-**Approach:**
-- Extract frames using Pillow (iterate over `n_frames`)
-- Convert each frame to ASCII grid
-- Output as ANSI animation (clear screen between frames with delay) or as an HTML page with JS frame cycling
-- Could live as a separate subcommand: `cli_art animate`
-
----
 
 ## Aspect Ratio Control (`--aspect`)
 **Let users override the automatic height calculation.**

@@ -4,6 +4,22 @@ from PIL import Image
 import pytest
 
 
+def _make_gif(
+    tmp_path: Path,
+    frames: list[Image.Image],
+    durations: list[int] | None = None,
+    filename: str = "test.gif",
+) -> Path:
+    path = tmp_path / filename
+    first = frames[0]
+    rest = frames[1:]
+    kwargs: dict = {"save_all": True, "append_images": rest, "loop": 0}
+    if durations is not None:
+        kwargs["duration"] = durations
+    first.save(path, format="GIF", **kwargs)
+    return path
+
+
 class MockResponse:
     def __init__(self, data: bytes, headers: dict | None = None):
         self._data = data
@@ -40,3 +56,16 @@ def small_red_png(tmp_path: Path) -> Path:
     path = tmp_path / "red.png"
     img.save(path)
     return path
+
+
+@pytest.fixture
+def single_frame_gif(tmp_path: Path) -> Path:
+    img = Image.new("RGB", (30, 10), color=(0, 255, 0))
+    return _make_gif(tmp_path, [img], filename="single.gif")
+
+
+@pytest.fixture
+def two_frame_gif(tmp_path: Path) -> Path:
+    frame1 = Image.new("RGB", (30, 10), color=(255, 0, 0))
+    frame2 = Image.new("RGB", (30, 10), color=(0, 255, 0))
+    return _make_gif(tmp_path, [frame1, frame2], durations=[100, 200], filename="two_frame.gif")

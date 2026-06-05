@@ -58,12 +58,6 @@ jobs:
 
 ## Testing
 
-### Extract shared test image fixture
-At least 7 tests in `test_cli.py` create the same gradient PNG inline — ~28 lines of duplication. Use a single `pytest.fixture`.
-
-### Move `MockResponse` to a shared `conftest.py`
-Two nearly identical mock response classes exist in `test_cli.py` and `test_download.py`. Share one in `tests/conftest.py`.
-
 ### `render_html()` is never tested
 `ascii.py:86–102` — `render_html` is defined but has zero test coverage. Add 2–3 tests covering basic output, empty grid, and XML escaping.
 

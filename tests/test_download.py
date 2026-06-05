@@ -6,6 +6,8 @@ import pytest
 
 from cli_art.download import DownloadError, download_image, is_url
 
+from .conftest import MockResponse
+
 
 def _tiny_png() -> bytes:
     """Create a minimal valid PNG (1×1 red pixel)."""
@@ -27,25 +29,6 @@ def _tiny_png() -> bytes:
     iend = struct.pack('>I', 0) + b'IEND' + iend_crc
 
     return sig + ihdr + idat + iend
-
-
-class MockResponse:
-    def __init__(self, data: bytes, headers: dict | None = None):
-        self._data = data
-        self._pos = 0
-        self.headers = headers or {}
-
-    def read(self, size: int = -1) -> bytes:
-        if size == -1:
-            remaining = self._data[self._pos:]
-            self._pos = len(self._data)
-            return remaining
-        chunk = self._data[self._pos:self._pos + size]
-        self._pos += len(chunk)
-        return chunk
-
-    def close(self) -> None:
-        pass
 
 
 def test_is_url() -> None:

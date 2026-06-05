@@ -5,31 +5,26 @@ from typer.testing import CliRunner
 
 from cli_art.cli import app
 
+from .conftest import MockResponse
+
 runner = CliRunner()
 
 
-def test_ascii(tmp_path: Path) -> None:
-    img = Image.new("RGB", (30, 10), color=(255, 0, 0))
-    for x in range(30):
-        for y in range(10):
-            img.putpixel((x, y), (int(x / 30 * 255), int(y / 10 * 255), 128))
-    img_path = tmp_path / "test.png"
-    img.save(img_path)
-
-    result = runner.invoke(app, ["ascii", str(img_path)])
+def test_ascii(tmp_path: Path, gradient_png: Path) -> None:
+    result = runner.invoke(app, ["ascii", str(gradient_png)])
     assert result.exit_code == 0
 
-    result = runner.invoke(app, ["ascii", str(img_path), "--invert"])
+    result = runner.invoke(app, ["ascii", str(gradient_png), "--invert"])
     assert result.exit_code == 0
 
     out_html = tmp_path / "out.html"
-    result = runner.invoke(app, ["ascii", str(img_path), "--output", str(out_html)])
+    result = runner.invoke(app, ["ascii", str(gradient_png), "--output", str(out_html)])
     assert result.exit_code == 0
     assert out_html.exists()
     assert out_html.stat().st_size > 0
 
     out_txt = tmp_path / "out.txt"
-    result = runner.invoke(app, ["ascii", str(img_path), "--output", str(out_txt)])
+    result = runner.invoke(app, ["ascii", str(gradient_png), "--output", str(out_txt)])
     assert result.exit_code == 0
     assert out_txt.exists()
     assert out_txt.stat().st_size > 0
@@ -40,89 +35,50 @@ def test_ascii_file_not_found() -> None:
     assert result.exit_code != 0
 
 
-def test_ascii_custom_chars(tmp_path: Path) -> None:
-    img = Image.new("RGB", (30, 10), color=(255, 0, 0))
-    for x in range(30):
-        for y in range(10):
-            img.putpixel((x, y), (int(x / 30 * 255), int(y / 10 * 255), 128))
-    img_path = tmp_path / "test.png"
-    img.save(img_path)
-
-    result = runner.invoke(app, ["ascii", str(img_path), "--chars", "@%#*+=-:. "])
+def test_ascii_custom_chars(gradient_png: Path) -> None:
+    result = runner.invoke(app, ["ascii", str(gradient_png), "--chars", "@%#*+=-:. "])
     assert result.exit_code == 0
 
 
-def test_ascii_custom_chars_invert(tmp_path: Path) -> None:
-    img = Image.new("RGB", (10, 10), color=(255, 0, 0))
-    img_path = tmp_path / "test.png"
-    img.save(img_path)
-
-    result = runner.invoke(app, ["ascii", str(img_path), "--chars", "@%#", "--invert"])
+def test_ascii_custom_chars_invert(small_red_png: Path) -> None:
+    result = runner.invoke(app, ["ascii", str(small_red_png), "--chars", "@%#", "--invert"])
     assert result.exit_code == 0
 
 
-def test_ascii_empty_chars_rejected(tmp_path: Path) -> None:
-    img = Image.new("RGB", (10, 10), color=(255, 0, 0))
-    img_path = tmp_path / "test.png"
-    img.save(img_path)
-
-    result = runner.invoke(app, ["ascii", str(img_path), "--chars", ""])
+def test_ascii_empty_chars_rejected(small_red_png: Path) -> None:
+    result = runner.invoke(app, ["ascii", str(small_red_png), "--chars", ""])
     assert result.exit_code != 0
 
 
-def test_ascii_single_char_ramp(tmp_path: Path) -> None:
-    img = Image.new("RGB", (10, 10), color=(255, 0, 0))
-    img_path = tmp_path / "test.png"
-    img.save(img_path)
-
-    result = runner.invoke(app, ["ascii", str(img_path), "--chars", "@"])
+def test_ascii_single_char_ramp(small_red_png: Path) -> None:
+    result = runner.invoke(app, ["ascii", str(small_red_png), "--chars", "@"])
     assert result.exit_code == 0
 
 
-def test_ascii_unicode_chars(tmp_path: Path) -> None:
-    img = Image.new("RGB", (10, 10), color=(255, 0, 0))
-    img_path = tmp_path / "test.png"
-    img.save(img_path)
-
-    result = runner.invoke(app, ["ascii", str(img_path), "--chars", " ░▒▓█"])
+def test_ascii_unicode_chars(small_red_png: Path) -> None:
+    result = runner.invoke(app, ["ascii", str(small_red_png), "--chars", " ░▒▓█"])
     assert result.exit_code == 0
 
 
-def test_theme_valid(tmp_path: Path) -> None:
-    img = Image.new("RGB", (10, 10), color=(255, 0, 0))
-    img_path = tmp_path / "test.png"
-    img.save(img_path)
-
-    result = runner.invoke(app, ["ascii", str(img_path), "--theme", "eighths"])
+def test_theme_valid(small_red_png: Path) -> None:
+    result = runner.invoke(app, ["ascii", str(small_red_png), "--theme", "eighths"])
     assert result.exit_code == 0
 
 
-def test_theme_invalid(tmp_path: Path) -> None:
-    img = Image.new("RGB", (10, 10), color=(255, 0, 0))
-    img_path = tmp_path / "test.png"
-    img.save(img_path)
-
-    result = runner.invoke(app, ["ascii", str(img_path), "--theme", "nope"])
+def test_theme_invalid(small_red_png: Path) -> None:
+    result = runner.invoke(app, ["ascii", str(small_red_png), "--theme", "nope"])
     assert result.exit_code != 0
 
 
-def test_theme_and_chars_conflict(tmp_path: Path) -> None:
-    img = Image.new("RGB", (10, 10), color=(255, 0, 0))
-    img_path = tmp_path / "test.png"
-    img.save(img_path)
-
+def test_theme_and_chars_conflict(small_red_png: Path) -> None:
     result = runner.invoke(
-        app, ["ascii", str(img_path), "--theme", "eighths", "--chars", "@%#"]
+        app, ["ascii", str(small_red_png), "--theme", "eighths", "--chars", "@%#"]
     )
     assert result.exit_code != 0
 
 
-def test_theme_with_invert(tmp_path: Path) -> None:
-    img = Image.new("RGB", (10, 10), color=(255, 0, 0))
-    img_path = tmp_path / "test.png"
-    img.save(img_path)
-
-    result = runner.invoke(app, ["ascii", str(img_path), "--theme", "eighths", "--invert"])
+def test_theme_with_invert(small_red_png: Path) -> None:
+    result = runner.invoke(app, ["ascii", str(small_red_png), "--theme", "eighths", "--invert"])
     assert result.exit_code == 0
 
 
@@ -156,35 +112,14 @@ def test_themes_command() -> None:
     assert "Available themes" in result.stdout
 
 
-def test_ascii_url_success(tmp_path: Path) -> None:
+def test_ascii_url_success(small_red_png: Path) -> None:
     from unittest.mock import patch
 
-    img = Image.new("RGB", (10, 10), color=(255, 0, 0))
-    img_path = tmp_path / "test.png"
-    img.save(img_path)
+    png_data = small_red_png.read_bytes()
 
-    with open(img_path, "rb") as f:
-        png_data = f.read()
-
-    class MockResp:
-        def __init__(self) -> None:
-            self.headers = {"Content-Length": str(len(png_data))}
-            self._data = png_data
-            self._pos = 0
-
-        def read(self, size: int = -1) -> bytes:
-            if size == -1:
-                remaining = self._data[self._pos:]
-                self._pos = len(self._data)
-                return remaining
-            chunk = self._data[self._pos:self._pos + size]
-            self._pos += len(chunk)
-            return chunk
-
-        def close(self) -> None:
-            pass
-
-    with patch("urllib.request.urlopen", return_value=MockResp()):
+    with patch("urllib.request.urlopen", return_value=MockResponse(
+        png_data, {"Content-Length": str(len(png_data))}
+    )):
         result = runner.invoke(app, ["ascii", "https://example.com/test.png"])
     assert result.exit_code == 0
 
@@ -250,16 +185,9 @@ def test_render_svg_xml_escaping() -> None:
     assert "&amp;" in svg
 
 
-def test_ascii_svg_output(tmp_path: Path) -> None:
-    img = Image.new("RGB", (30, 10), color=(255, 0, 0))
-    for x in range(30):
-        for y in range(10):
-            img.putpixel((x, y), (int(x / 30 * 255), int(y / 10 * 255), 128))
-    img_path = tmp_path / "test.png"
-    img.save(img_path)
-
+def test_ascii_svg_output(tmp_path: Path, gradient_png: Path) -> None:
     out_svg = tmp_path / "out.svg"
-    result = runner.invoke(app, ["ascii", str(img_path), "--output", str(out_svg)])
+    result = runner.invoke(app, ["ascii", str(gradient_png), "--output", str(out_svg)])
     assert result.exit_code == 0
     assert out_svg.exists()
     assert out_svg.stat().st_size > 0

@@ -19,6 +19,7 @@ pytest -v                          # Run tests
 - Merges to `main` are done exclusively via GitHub Pull Request — never push directly to `main`.
 - Before opening a PR, run `pytest -v` and ensure all tests pass.
 - Also review the diff (`git diff main...HEAD`) and recent commits (`git log --oneline -10`) to confirm only intended changes are included.
+- Update `tech-debts.md` — remove entries for any items resolved in the PR and add any new debt discovered during the work.
 
 ## Available Subagents
 

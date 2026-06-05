@@ -1,9 +1,5 @@
 # Technical Debt & Improvements
 
-## Performance
-
----
-
 ## Dependencies & Python Version
 
 ### Consider bumping to `requires-python = ">=3.11"`
@@ -17,6 +13,15 @@ Python 3.10 goes EOL in October 2026. Python 3.11 is ~25% faster on average, and
 
 ### Missing error wrapping for invalid local images
 If `Image.open()` fails on a corrupt local file, the raw PIL exception propagates to the user (URL downloads get nice `DownloadError` wrapping). Wrap in try/except and raise a typed error.
+
+### Add `assert pixels is not None` after `img.load()` in `ascii.py`
+Pillow's stubs type `Image.load()` as returning `PixelAccess | None`. In practice it never returns `None` for RGB images, but strict mypy will reject `pixels[x, y]` without a guard. An `assert pixels is not None` or a `# type: ignore` is needed.
+
+### `cli.py` re-renders the grid twice when `--output` is used
+Lines 98–100: `render_ansi(grid)` is called once for the file output, then again for stdout. Could cache the result to avoid double-render for large grids.
+
+### `is_url()` is case-sensitive
+`_URL_PREFIXES = ("http://", "https://")` — `HTTP://` or `HTTPS://` would not be detected as URLs. Add `.lower()` or `.casefold()`.
 
 ---
 
@@ -63,3 +68,6 @@ jobs:
 
 ### No direct unit test for `render_ansi()`
 Tested indirectly via CLI invocations but not as a unit.
+
+### `MockResponse` imported from `conftest` is fragile
+`test_cli.py` and `test_download.py` import `MockResponse` from `.conftest`. If the test layout changes, this breaks. Consider extracting to a separate `test_helpers.py` module.

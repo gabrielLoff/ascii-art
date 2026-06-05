@@ -32,5 +32,14 @@ def test_resolve_chars_empty_string_is_not_a_theme() -> None:
 
 
 def test_themes_dict_has_expected_keys() -> None:
-    expected = {"eighths", "vertical-bars", "quadrant", "stippled", "halftone", "geometric", "mono"}
+    expected = {
+        "eighths", "vertical-bars", "quadrant", "stippled", "halftone", "geometric", "mono",
+        "braille", "shade-blocks", "classic", "numerical",
+    }
     assert set(THEMES) == expected
+
+
+def test_all_theme_chars_are_single_codepoints() -> None:
+    for name, ramp in THEMES.items():
+        for char in ramp:
+            assert len(char) == 1, f"Theme '{name}' has multi-codepoint char {char!r}"

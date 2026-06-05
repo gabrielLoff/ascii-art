@@ -130,7 +130,8 @@ def test_complete_theme_empty() -> None:
     from cli_art.cli import _complete_theme
     names = _complete_theme(None, "")
     assert names == sorted(["eighths", "vertical-bars", "quadrant",
-                            "stippled", "halftone", "geometric", "mono"])
+                            "stippled", "halftone", "geometric", "mono",
+                            "braille", "shade-blocks", "classic", "numerical"])
 
 
 def test_complete_theme_partial() -> None:
@@ -138,6 +139,8 @@ def test_complete_theme_partial() -> None:
     assert _complete_theme(None, "ve") == ["vertical-bars"]
     assert _complete_theme(None, "e") == ["eighths"]
     assert _complete_theme(None, "mon") == ["mono"]
+    assert _complete_theme(None, "br") == ["braille"]
+    assert _complete_theme(None, "cl") == ["classic"]
 
 
 def test_complete_theme_no_match() -> None:
@@ -149,6 +152,7 @@ def test_themes_command() -> None:
     result = runner.invoke(app, ["themes"])
     assert result.exit_code == 0
     assert "eighths" in result.stdout
+    assert "braille" in result.stdout
     assert "Available themes" in result.stdout
 
 

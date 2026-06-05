@@ -4,14 +4,6 @@ Convert images to color ASCII art in your terminal.
 
 ## Installation
 
-### Global install (recommended)
-
-```bash
-pip install git+https://github.com/yourusername/cli-art.git
-```
-
-This makes `cli_art` available system-wide.
-
 ### Local / development install
 
 ```bash
@@ -29,8 +21,11 @@ pip install -e .
 # Convert an image to ASCII art
 cli_art ascii path/to/image.jpg
 
-# Control output width (default: 80)
+# Control output width (default: auto-detect terminal width)
 cli_art ascii image.jpg --width 40
+
+# Use a URL instead of a local file
+cli_art ascii https://example.com/photo.jpg
 
 # Invert brightness mapping
 cli_art ascii image.jpg --invert
@@ -44,8 +39,9 @@ cli_art ascii image.jpg --theme eighths
 # List available themes
 cli_art themes
 
-# Save to file (.html preserves color, .txt keeps ANSI codes)
+# Save to file (.html, .svg preserve color; .txt keeps ANSI codes)
 cli_art ascii image.jpg --output art.html
+cli_art ascii image.jpg --output art.svg
 cli_art ascii image.jpg --output art.txt
 
 # Run via Python module
@@ -62,10 +58,10 @@ python -m cli_art ascii image.jpg
 ### `ascii` options
 
 | Option | Default | Description |
-|---|---|---|
-| `image_path` | — | Path to the image file (required) |
-| `--width` / `-w` | `80` | Output width in characters |
-| `--output` / `-o` | — | Save to file (.html or .txt) |
+|---|---|---|---|
+| `source` | — | Path or URL of the image (required) |
+| `--width` / `-w` | Auto (terminal width) | Output width in characters |
+| `--output` / `-o` | — | Save to file (.html / .svg for those formats, otherwise ANSI text) |
 | `--invert` | — | Invert brightness mapping |
 | `--chars` | — | Custom character ramp (dark to bright). Mutually exclusive with `--theme` |
 | `--theme` | — | Named theme. Mutually exclusive with `--chars` |
@@ -73,14 +69,18 @@ python -m cli_art ascii image.jpg
 ### Available themes
 
 | Theme | Ramp | Vibe |
-|---|---|---|
+|---|---|---|---|
+| `braille` | ` ⠀⠁⠂⠄⡀⢀⠠⠐⠈⠘⠨⠰⠱⠲⠶⠷⠿` | High-resolution dot-matrix |
+| `classic` | ` .,:;i1IlLCH$@#` | Traditional ASCII art |
 | `eighths` | ` ▁▂▃▄▅▆▇█` | Smooth gradient, photorealistic |
-| `vertical-bars` | ` ▏▎▍▌▋▊▉█` | Scanline, techy |
-| `quadrant` | ` ▘▝▀▖▌▞▛▜█` | Pixel-art, retro |
-| `stippled` | ` .·:•oO0@%#█` | Sketchy, ink-drawing |
-| `halftone` | ` .·:*%#@` | Newsprint, halftone |
 | `geometric` | ` ○◔◐◕●▪▫◻◼⬡◆◇⬢` | Minimalist, vector-art |
+| `halftone` | ` .·:*%#@` | Newsprint, halftone |
 | `mono` | ` .·●` | Minimal, editorial |
+| `numerical` | ` 123456789` | Numeric, unexpected |
+| `quadrant` | ` ▘▝▀▖▌▞▛▜█` | Pixel-art, retro |
+| `shade-blocks` | ` ░▒▓█` | Simple and bold |
+| `stippled` | ` .·:•oO0@%#█` | Sketchy, ink-drawing |
+| `vertical-bars` | ` ▏▎▍▌▋▊▉█` | Scanline, techy |
 
 ## Shell Completion
 

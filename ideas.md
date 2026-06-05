@@ -10,30 +10,8 @@
 - Add a `render_plain()` function in `ascii.py` that outputs characters only (no ANSI escapes)
 - When `--no-color` is set, call `render_plain()` instead of `render_ansi()`
 
----
 
-## More Character Themes
-**Expand the theme collection with additional creative ramps.**
 
-**Suggested themes:**
-- **Braille** — ` ⠀⠁⠂⠄⡀⢀⠠⠐⠈⠘⠨⠰⠱⠲⠶⠷⠿` (high resolution, pure ASCII)
-- **Shade blocks** — ` ░▒▓█` (simple and bold)
-- **Classic** — ` .,:;i1IlLCH$@#` (classic ASCII-art ramp)
-- **Numerical** — ` 123456789` (unexpected but fun)
-
----
-
-## SVG Output
-**Generate scalable vector ASCII art as SVG.**
-
-**Why:** SVG output is scalable, copyable, and embeddable in presentations, websites, or design tools — unlike HTML `<pre>` output which is tied to specific font sizing.
-
-**Approach:**
-- Add a new output format (detected via `--output file.svg`)
-- Generate SVG with `<text>` elements and precise positioning
-- Use `<tspan>` or individual `<text>` nodes for each character with its color
-
----
 
 ## Animated GIF Support
 **Convert animated GIFs into frame-by-frame ASCII animations.**

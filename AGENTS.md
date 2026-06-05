@@ -2,6 +2,9 @@
 
 ## Commands
 
+- **The virtual environment must be activated before running any command below.**
+- Activate with `source .venv/bin/activate` (zsh) or `. .venv/bin/activate` (bash).
+
 ```
 source .venv/bin/activate          # Activate virtual env
 pip install -e ".[dev]"            # Install package + dev deps
@@ -9,6 +12,13 @@ cli_art                            # Run the CLI
 python -m cli_art                  # Run via module
 pytest -v                          # Run tests
 ```
+
+## Git & Branching
+
+- Every feature must be developed on a new branch with the prefix `feature/` (e.g. `feature/add-rainbow-theme`).
+- Merges to `main` are done exclusively via GitHub Pull Request — never push directly to `main`.
+- Before opening a PR, run `pytest -v` and ensure all tests pass.
+- Also review the diff (`git diff main...HEAD`) and recent commits (`git log --oneline -10`) to confirm only intended changes are included.
 
 ## Available Subagents
 

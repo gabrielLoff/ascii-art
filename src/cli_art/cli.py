@@ -1,6 +1,8 @@
+import shutil
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Iterator, Optional
+from collections.abc import Iterator
+from typing import Optional
 
 import typer
 
@@ -42,10 +44,15 @@ def _ramp_preview(ramp: str, width: int = 24) -> str:
     )
 
 
+def _default_width() -> int:
+    """Return terminal width, falling back to 80 when not in a TTY."""
+    return shutil.get_terminal_size().columns
+
+
 @app.command()
 def ascii(
     source: str = typer.Argument(..., help="Path or URL of the image"),
-    width: int = typer.Option(80, "--width", "-w", help="Output width in characters"),
+    width: int = typer.Option(_default_width, "--width", "-w", help="Output width in characters"),
     output: Optional[Path] = typer.Option(
         None, "--output", "-o", help="Save to file (.html for HTML, otherwise ANSI text)"
     ),

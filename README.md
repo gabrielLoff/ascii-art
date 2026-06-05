@@ -44,6 +44,17 @@ cli_art ascii image.jpg --output art.html
 cli_art ascii image.jpg --output art.svg
 cli_art ascii image.jpg --output art.txt
 
+# Use a different mapping mode
+cli_art ascii image.jpg --mode edge         # Sobel edge detection
+cli_art ascii image.jpg --mode threshold    # Black & white posterization
+cli_art ascii image.jpg --mode color-to-char # Map hue to characters
+
+# Output plain text (no ANSI color codes)
+cli_art ascii image.jpg --no-color
+
+# Copy the result to the system clipboard
+cli_art ascii image.jpg --copy
+
 # Run via Python module
 python -m cli_art ascii image.jpg
 ```
@@ -62,9 +73,12 @@ python -m cli_art ascii image.jpg
 | `source` | — | Path or URL of the image (required) |
 | `--width` / `-w` | Auto (terminal width) | Output width in characters |
 | `--output` / `-o` | — | Save to file (.html / .svg for those formats, otherwise ANSI text) |
-| `--invert` | — | Invert brightness mapping |
+| `--invert` / `--no-invert` | — | Invert brightness mapping |
 | `--chars` | — | Custom character ramp (dark to bright). Mutually exclusive with `--theme` |
 | `--theme` | — | Named theme. Mutually exclusive with `--chars` |
+| `--mode` | `linear` | Mapping mode: `linear`, `edge`, `threshold`, `color-to-char` |
+| `--no-color` / `--color` | — | Output plain text without ANSI codes |
+| `--copy` / `-c` | — | Copy the result to the system clipboard |
 
 ### Available themes
 
@@ -81,6 +95,27 @@ python -m cli_art ascii image.jpg
 | `shade-blocks` | ` ░▒▓█` | Simple and bold |
 | `stippled` | ` .·:•oO0@%#█` | Sketchy, ink-drawing |
 | `vertical-bars` | ` ▏▎▍▌▋▊▉█` | Scanline, techy |
+
+## Configuration
+
+Create `~/.config/cli-art/config.toml` to set persistent defaults:
+
+```toml
+[defaults]
+width = 100
+invert = true
+theme = "eighths"
+mode = "edge"
+no_color = false
+```
+
+CLI flags always override config values. Set `CLI_ART_CONFIG` to use a custom config path.
+
+To install clipboard support (required for `--copy`):
+
+```bash
+pip install cli-art[clipboard]
+```
 
 ## Shell Completion
 
@@ -99,3 +134,5 @@ After installation, restart your shell or source your rc file.
 pip install -e ".[dev]"
 pytest -v
 ```
+
+The `[dev]` extra includes `pyperclip` for clipboard tests. The clipboard feature can also be installed standalone via `pip install cli-art[clipboard]`.

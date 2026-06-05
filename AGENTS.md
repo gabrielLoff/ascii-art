@@ -50,17 +50,27 @@ cli-art/
 │       ├── __main__.py     # Enables `python -m cli_art`
 │       ├── cli.py          # typer app + commands (thin)
 │       ├── ascii.py        # Image-to-ASCII conversion logic
+│       ├── modes.py        # Mapping mode functions (linear, edge, threshold, hue)
+│       ├── config.py       # TOML config file loading
+│       ├── clipboard.py    # System clipboard copy
 │       ├── download.py     # URL download + temp file management
 │       └── themes.py       # Character ramp themes
 └── tests/
     ├── __init__.py
+    ├── conftest.py         # Shared fixtures (gradient_png, small_red_png, MockResponse)
     ├── test_cli.py         # CLI integration tests
+    ├── test_modes.py       # Mapping mode unit tests
+    ├── test_config.py      # Config file unit + integration tests
+    ├── test_clipboard.py   # Clipboard unit tests
     ├── test_download.py    # Download module unit tests
     └── test_themes.py      # Theme resolution unit tests
 ```
 
 - **`cli.py`** — defines the `typer.Typer()` app and all commands. Keep this file thin — import logic from separate modules.
 - **`ascii.py`** — image-to-ASCII conversion logic.
+- **`modes.py`** — mapping mode functions (linear, edge, threshold, hue). Each takes a resized image + char ramp → `AsciiGrid`.
+- **`config.py`** — TOML config file loading via `tomllib` (stdlib 3.11+) or `tomli` (backport). Platform-aware path resolution.
+- **`clipboard.py`** — system clipboard copy via `pyperclip` (optional dep, `cli-art[clipboard]`).
 - **`download.py`** — URL detection, image download with size limits, temp file cleanup via context manager.
 - **`themes.py`** — theme data and `resolve_chars()` helper.
 - **`__main__.py`** — calls `app()` so `python -m cli_art` works.

@@ -9,7 +9,10 @@ from .ascii import CHARS, AsciiGrid, _apply_palette, _escape_xml, _image_to_grid
 
 
 def extract_frames(path: str | Path, max_frames: int = 500) -> list[tuple[Image.Image, int]]:
-    img = Image.open(path)
+    try:
+        img = Image.open(path)
+    except Exception as e:
+        raise AnimationError(f"Failed to open image: {e}") from e
     frames: list[tuple[Image.Image, int]] = []
     try:
         while True:

@@ -228,6 +228,25 @@ def test_apply_palette_with_file(tmp_path: Path) -> None:
     assert result.mode == "RGB"
 
 
+def test_image_to_ascii_grid_corrupt_file_raises(tmp_path: Path) -> None:
+    from cli_art.ascii import ImageError
+
+    corrupt = tmp_path / "corrupt.png"
+    corrupt.write_bytes(b"not a real image")
+    with pytest.raises(ImageError, match="Failed to open image"):
+        image_to_ascii_grid(corrupt)
+
+
+def test_apply_palette_corrupt_palette_file_raises(tmp_path: Path) -> None:
+    from cli_art.ascii import ImageError
+
+    img = Image.new("RGB", (10, 10), (128, 128, 128))
+    corrupt = tmp_path / "corrupt.png"
+    corrupt.write_bytes(b"not a real image")
+    with pytest.raises(ImageError, match="Failed to open palette file"):
+        _apply_palette(img, palette_file=str(corrupt))
+
+
 def test_apply_palette_with_file_and_colors(tmp_path: Path) -> None:
     ref = tmp_path / "ref.png"
     ref_img = Image.new("RGB", (4, 1))

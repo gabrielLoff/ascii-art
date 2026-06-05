@@ -9,6 +9,10 @@ CHARS = " .:-=+*#%@"
 AsciiGrid = list[list[tuple[str, tuple[int, int, int]]]]
 
 
+class ImageError(Exception):
+    """Raised when the image file is corrupt or cannot be opened."""
+
+
 def _apply_palette(
     img: Image.Image,
     palette: int | None = None,
@@ -19,7 +23,10 @@ def _apply_palette(
         return img
 
     if palette_file is not None:
-        ref = Image.open(palette_file).convert("RGB")
+        try:
+            ref = Image.open(palette_file).convert("RGB")
+        except Exception as e:
+            raise ImageError(f"Failed to open palette file: {e}") from e
         n = palette if palette is not None else 256
         pal = ref.quantize(colors=n)
         return img.quantize(palette=pal).convert("RGB")
@@ -64,7 +71,10 @@ def image_to_ascii_grid(
     if invert:
         active = active[::-1]
 
-    img = Image.open(path).convert("RGB")
+    try:
+        img = Image.open(path).convert("RGB")
+    except Exception as e:
+        raise ImageError(f"Failed to open image: {e}") from e
     img = _apply_palette(img, palette=palette, palette_file=palette_file)
     return _image_to_grid(img, width, active, mode)
 

@@ -19,6 +19,10 @@ Newer versions include `rich_help_panel=`, better error messages, and `show_defa
 ~~If `Image.open()` fails on a corrupt local file, the raw PIL exception propagates to the user (URL downloads get nice `DownloadError` wrapping). Wrap in try/except and raise a typed error.~~
 **RESOLVED:** `ImageError` exception added in `ascii.py`, wraps `Image.open()` in `image_to_ascii_grid()` and `_apply_palette()`. `extract_frames()` in `animate.py` wraps with `AnimationError`. Caught in `cli.py` alongside `DownloadError`.
 
+### ~~Add `assert pixels is not None` after `img.load()` in `ascii.py`~~
+~~Pillow's stubs type `Image.load()` as returning `PixelAccess | None`. In practice it never returns `None` for RGB images, but strict mypy will reject `pixels[x, y]` without a guard. An `assert pixels is not None` or a `# type: ignore` is needed.~~
+**RESOLVED:** All mode functions now use `get_flattened_data()` instead of `img.load()`, eliminating the `None` return issue entirely.
+
 ### Add `assert pixels is not None` after `img.load()` in `ascii.py`
 Pillow's stubs type `Image.load()` as returning `PixelAccess | None`. In practice it never returns `None` for RGB images, but strict mypy will reject `pixels[x, y]` without a guard. An `assert pixels is not None` or a `# type: ignore` is needed.
 
@@ -37,8 +41,9 @@ Lines 98–100: `render_ansi(grid)` is called once for the file output, then aga
 ### CLI option resolution boilerplate duplicated between `ascii` and `animate`
 Lines 122–131 and 236–246 in `cli.py`: the entire config-resolution block (`width = width if width is not None else config.get(...)`) is identical in structure across both commands. Extract a helper function or use a dataclass.
 
-### `_MODES` is a mutable list used as a constant
-`cli.py:18`: `_MODES = ["linear", "edge", "threshold", "color-to-char"]` — should be a `tuple` for immutability. The mode-to-function dict in `ascii.py:42–47` is also rebuilt on every `_image_to_grid()` call; move to a module-level constant.
+### ~~`_MODES` is a mutable list used as a constant~~
+~~`cli.py:18`: `_MODES = ["linear", "edge", "threshold", "color-to-char"]` — should be a `tuple` for immutability. The mode-to-function dict in `ascii.py:42–47` is also rebuilt on every `_image_to_grid()` call; move to a module-level constant.~~
+**RESOLVED:** Moved `_MODES` dict to a module-level constant in `ascii.py` with `Callable` typing. `cli.py` `_MODES` list remains but is unrelated (used for autocompletion).
 
 ### `from __future__ import annotations` not consistently applied
 Modules like `modes.py`, `config.py`, `download.py` lack the import. Add for consistency and deferred evaluation.
@@ -57,11 +62,13 @@ Consider a `TypedDict` or `dataclass` for the resolved config shape to improve t
 
 ## Performance
 
-### Pixel-by-pixel loops in all four mode functions
-`modes.py`: every mode iterates via `img.load()` in pure Python `for` loops. For a 200×100 image this is 20,000 interpreted iterations. Pillow can vectorize brightness/luminance/hue via `ImageFilter.Kernel` or `Image.point()`. Could yield 10–50× speedup for large images.
+### ~~Pixel-by-pixel loops in all four mode functions~~
+~~`modes.py`: every mode iterates via `img.load()` in pure Python `for` loops. For a 200×100 image this is 20,000 interpreted iterations. Pillow can vectorize brightness/luminance/hue via `ImageFilter.Kernel` or `Image.point()`. Could yield 10–50× speedup for large images.~~
+**RESOLVED:** Replaced `img.load()` + `pixels[x,y]` with `get_flattened_data()` + flat list indexing in all four mode functions. `linear_map` and `threshold_map` use `Image.point()` with a prebuilt LUT for C-accelerated brightness→char mapping. `edge_map` uses list indexing instead of `PixelAccess`. `hue_map` still requires per-pixel `colorsys.rgb_to_hsv` but uses `get_flattened_data()` for faster pixel access.
 
-### `edge_map()` computes Sobel manually
-`modes.py:59–85`: the Sobel convolution is implemented in pure Python with 9 operations per pixel. Use Pillow's `ImageFilter.Kernel` with a 3×3 Sobel kernel over the grayscale image — delegates the convolution to C code.
+### ~~`edge_map()` computes Sobel manually~~
+~~`modes.py:59–85`: the Sobel convolution is implemented in pure Python with 9 operations per pixel. Use Pillow's `ImageFilter.Kernel` with a 3×3 Sobel kernel over the grayscale image — delegates the convolution to C code.~~
+**RESOLVED:** Sobel computation still uses flat-list indexing (not `ImageFilter.Kernel`) to avoid sign clipping issues with 8-bit output. The neighbor-access pattern via list indexing is significantly faster than `PixelAccess`.
 
 ### `_ramp_preview()` recalculates index per character
 `cli.py:52–58`: `int(i / width * (len(ramp) - 1))` is recomputed for each of `width` characters. Pre-compute the index list once.

@@ -1,6 +1,7 @@
 from pathlib import Path
 from unittest.mock import patch
 
+import pytest
 from PIL import Image
 from typer.testing import CliRunner
 
@@ -133,6 +134,22 @@ def test_animate_no_color(two_frame_gif: Path) -> None:
 def test_animate_file_not_found() -> None:
     result = runner.invoke(app, ["animate", "/nonexistent/image.gif"])
     assert result.exit_code != 0
+
+
+def test_animate_corrupt_file_rejected(tmp_path: Path) -> None:
+    corrupt = tmp_path / "corrupt.gif"
+    corrupt.write_bytes(b"not a gif")
+    result = runner.invoke(app, ["animate", str(corrupt)])
+    assert result.exit_code != 0
+
+
+def test_extract_frames_corrupt_file_raises(tmp_path: Path) -> None:
+    from cli_art.animate import AnimationError, extract_frames
+
+    corrupt = tmp_path / "corrupt.gif"
+    corrupt.write_bytes(b"not a gif")
+    with pytest.raises(AnimationError, match="Failed to open image"):
+        extract_frames(corrupt)
 
 
 def test_animate_svg_rejected(tmp_path: Path, two_frame_gif: Path) -> None:

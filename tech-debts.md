@@ -15,8 +15,9 @@ Newer versions include `rich_help_panel=`, better error messages, and `show_defa
 
 ## Code Quality & Type Safety
 
-### Missing error wrapping for invalid local images
-If `Image.open()` fails on a corrupt local file, the raw PIL exception propagates to the user (URL downloads get nice `DownloadError` wrapping). Wrap in try/except and raise a typed error.
+### ~~Missing error wrapping for invalid local images~~
+~~If `Image.open()` fails on a corrupt local file, the raw PIL exception propagates to the user (URL downloads get nice `DownloadError` wrapping). Wrap in try/except and raise a typed error.~~
+**RESOLVED:** `ImageError` exception added in `ascii.py`, wraps `Image.open()` in `image_to_ascii_grid()` and `_apply_palette()`. `extract_frames()` in `animate.py` wraps with `AnimationError`. Caught in `cli.py` alongside `DownloadError`.
 
 ### Add `assert pixels is not None` after `img.load()` in `ascii.py`
 Pillow's stubs type `Image.load()` as returning `PixelAccess | None`. In practice it never returns `None` for RGB images, but strict mypy will reject `pixels[x, y]` without a guard. An `assert pixels is not None` or a `# type: ignore` is needed.
@@ -42,8 +43,9 @@ Lines 122–131 and 236–246 in `cli.py`: the entire config-resolution block (`
 ### `from __future__ import annotations` not consistently applied
 Modules like `modes.py`, `config.py`, `download.py` lack the import. Add for consistency and deferred evaluation.
 
-### `_apply_palette()` can raise unhandled `OSError`
-`ascii.py:18`: `Image.open(palette_file)` can raise if the file is corrupt or not an image. Wrap and raise a typed error.
+### ~~`_apply_palette()` can raise unhandled `OSError`~~
+~~`ascii.py:18`: `Image.open(palette_file)` can raise if the file is corrupt or not an image. Wrap and raise a typed error.~~
+**RESOLVED:** Wrapped in `_apply_palette()` alongside the main `image_to_ascii_grid()` fix — all `Image.open()` calls now raise `ImageError`.
 
 ### `config.get("palette_file")` returns unvalidated `Any`
 `cli.py`: config could contain `palette_file = 123` (integer), which would crash `Path(123)`. Validate the value is a `str` before converting.

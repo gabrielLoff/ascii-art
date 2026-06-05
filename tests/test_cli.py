@@ -35,6 +35,13 @@ def test_ascii_file_not_found() -> None:
     assert result.exit_code != 0
 
 
+def test_ascii_corrupt_file_rejected(tmp_path: Path) -> None:
+    corrupt = tmp_path / "corrupt.png"
+    corrupt.write_bytes(b"not an image")
+    result = runner.invoke(app, ["ascii", str(corrupt)])
+    assert result.exit_code != 0
+
+
 def test_ascii_custom_chars(gradient_png: Path) -> None:
     result = runner.invoke(app, ["ascii", str(gradient_png), "--chars", "@%#*+=-:. "])
     assert result.exit_code == 0

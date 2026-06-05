@@ -4,7 +4,7 @@ from pathlib import Path
 from collections.abc import Iterator
 import typer
 
-from .ascii import CHARS, image_to_ascii_grid, render_ansi, render_html, render_plain, render_svg
+from .ascii import CHARS, ImageError, image_to_ascii_grid, render_ansi, render_html, render_plain, render_svg
 from .clipboard import ClipboardError, copy_to_clipboard
 from .config import load_config
 from .download import DownloadError, download_image, is_url
@@ -152,7 +152,7 @@ def ascii(
                 palette=palette,
                 palette_file=palette_file,
             )
-    except DownloadError as e:
+    except (DownloadError, ImageError) as e:
         raise typer.BadParameter(str(e))
 
     output_text = render_plain(grid) if no_color else render_ansi(grid)
@@ -259,7 +259,7 @@ def animate(
     try:
         with _resolve_image(source) as local_path:
             frames = extract_frames(local_path, max_frames=max_frames)
-    except DownloadError as e:
+    except (DownloadError, AnimationError, ImageError) as e:
         raise typer.BadParameter(str(e))
 
     if len(frames) == 0:

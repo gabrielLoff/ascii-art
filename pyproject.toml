@@ -1,0 +1,24 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "cli-art"
+version = "0.1.0"
+description = "A CLI tool for creating ASCII art"
+requires-python = ">=3.10"
+dependencies = [
+    "typer>=0.12.0",
+    "pillow>=10.0.0",
+]
+
+[project.scripts]
+cli_art = "cli_art.cli:app"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

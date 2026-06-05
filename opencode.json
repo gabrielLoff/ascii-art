@@ -1,0 +1,21 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "agent": {
+    "debugger": {
+      "description": "Debugs errors during development. Use when encountering runtime errors, test failures, type errors, lint errors, or unexpected behavior.",
+      "mode": "subagent"
+    },
+    "consultant": {
+      "description": "Reviews code for clarity, structure, and consistency. Use before committing changes or when you want a fresh perspective on code quality.",
+      "mode": "subagent"
+    },
+    "creative": {
+      "description": "Suggests new features or evolutions of existing features. Use when you want fresh ideas for expanding the tool.",
+      "mode": "subagent"
+    },
+    "feature-architect": {
+      "description": "Plans implementation of new features from a technical perspective, analyzing trade-offs and presenting options.",
+      "mode": "subagent"
+    }
+  }
+}

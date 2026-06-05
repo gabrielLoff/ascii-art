@@ -103,6 +103,19 @@ def ascii(
         "-c",
         help="Copy the rendered ASCII art to the system clipboard",
     ),
+    palette: int | None = typer.Option(
+        None,
+        "--palette",
+        help="Reduce colors to N levels (2–256) before ASCII conversion",
+        min=2,
+        max=256,
+        clamp=True,
+    ),
+    palette_file: Path | None = typer.Option(
+        None,
+        "--palette-file",
+        help="Extract color palette from a reference image",
+    ),
 ) -> None:
     """Convert an image to color ASCII art."""
     config = load_config()
@@ -113,9 +126,15 @@ def ascii(
     chars = chars if chars is not None else config.get("chars")
     theme = theme if theme is not None else config.get("theme")
     mode = mode if mode is not None else config.get("mode", "linear")
+    palette = palette if palette is not None else config.get("palette")
+    palette_file_raw = palette_file if palette_file is not None else config.get("palette_file")
+    palette_file = Path(palette_file_raw) if palette_file_raw is not None else None
 
     if chars is not None and len(chars) == 0:
         raise typer.BadParameter("--chars must not be an empty string")
+
+    if palette_file is not None and not palette_file.exists():
+        raise typer.BadParameter(f"Palette file not found: {palette_file}")
 
     try:
         active_chars = resolve_chars(chars, theme)
@@ -124,7 +143,15 @@ def ascii(
 
     try:
         with _resolve_image(source) as local_path:
-            grid = image_to_ascii_grid(local_path, width=width, invert=invert, chars=active_chars, mode=mode)
+            grid = image_to_ascii_grid(
+                local_path,
+                width=width,
+                invert=invert,
+                chars=active_chars,
+                mode=mode,
+                palette=palette,
+                palette_file=palette_file,
+            )
     except DownloadError as e:
         raise typer.BadParameter(str(e))
 
@@ -189,6 +216,19 @@ def animate(
     max_frames: int | None = typer.Option(
         None, "--max-frames", help="Maximum number of frames to process (default: 500)",
     ),
+    palette: int | None = typer.Option(
+        None,
+        "--palette",
+        help="Reduce colors to N levels (2–256) before ASCII conversion",
+        min=2,
+        max=256,
+        clamp=True,
+    ),
+    palette_file: Path | None = typer.Option(
+        None,
+        "--palette-file",
+        help="Extract color palette from a reference image",
+    ),
 ) -> None:
     """Convert an animated GIF to a looping ASCII animation."""
     config = load_config()
@@ -201,9 +241,15 @@ def animate(
     theme = theme if theme is not None else config.get("theme")
     mode = mode if mode is not None else config.get("mode", "linear")
     max_frames = max_frames if max_frames is not None else config.get("max_frames", 500)
+    palette = palette if palette is not None else config.get("palette")
+    palette_file_raw = palette_file if palette_file is not None else config.get("palette_file")
+    palette_file = Path(palette_file_raw) if palette_file_raw is not None else None
 
     if chars is not None and len(chars) == 0:
         raise typer.BadParameter("--chars must not be an empty string")
+
+    if palette_file is not None and not palette_file.exists():
+        raise typer.BadParameter(f"Palette file not found: {palette_file}")
 
     try:
         active_chars = resolve_chars(chars, theme)
@@ -219,7 +265,7 @@ def animate(
     if len(frames) == 0:
         raise typer.BadParameter("No frames found in the source")
 
-    animated = frames_to_grids(frames, width, active_chars, mode)
+    animated = frames_to_grids(frames, width, active_chars, mode, palette=palette, palette_file=palette_file)
 
     if output is not None:
         suffix = output.suffix.lower()

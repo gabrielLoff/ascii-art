@@ -327,3 +327,52 @@ def test_explicit_width_overrides_default(tmp_path: Path) -> None:
     assert result_wide.exit_code == 0
     assert result_narrow.exit_code == 0
     assert len(result_wide.stdout) > len(result_narrow.stdout)
+
+
+def test_ascii_palette_two(gradient_png: Path) -> None:
+    result = runner.invoke(app, ["ascii", str(gradient_png), "--palette", "2"])
+    assert result.exit_code == 0
+
+
+def test_ascii_palette_eight(gradient_png: Path) -> None:
+    result = runner.invoke(app, ["ascii", str(gradient_png), "--palette", "8"])
+    assert result.exit_code == 0
+
+
+def test_ascii_palette_with_theme(gradient_png: Path) -> None:
+    result = runner.invoke(
+        app, ["ascii", str(gradient_png), "--palette", "4", "--theme", "eighths"]
+    )
+    assert result.exit_code == 0
+
+
+def test_ascii_palette_with_mode(gradient_png: Path) -> None:
+    result = runner.invoke(
+        app, ["ascii", str(gradient_png), "--palette", "4", "--mode", "threshold"]
+    )
+    assert result.exit_code == 0
+
+
+def test_ascii_palette_file(tmp_path: Path, gradient_png: Path) -> None:
+    ref = tmp_path / "ref.png"
+    Image.new("RGB", (4, 1), (255, 0, 0)).save(ref)
+    result = runner.invoke(
+        app, ["ascii", str(gradient_png), "--palette-file", str(ref)]
+    )
+    assert result.exit_code == 0
+
+
+def test_ascii_palette_file_not_found(gradient_png: Path) -> None:
+    result = runner.invoke(
+        app, ["ascii", str(gradient_png), "--palette-file", "/nonexistent/ref.png"]
+    )
+    assert result.exit_code != 0
+
+
+def test_ascii_palette_file_with_colors(tmp_path: Path, gradient_png: Path) -> None:
+    ref = tmp_path / "ref.png"
+    Image.new("RGB", (4, 1), (255, 0, 0)).save(ref)
+    result = runner.invoke(
+        app, ["ascii", str(gradient_png), "--palette", "4", "--palette-file", str(ref)]
+    )
+    assert result.exit_code == 0

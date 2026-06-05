@@ -4,7 +4,7 @@ from PIL import Image
 import pytest
 
 from cli_art.modes import edge_map, hue_map, linear_map, threshold_map
-from cli_art.ascii import image_to_ascii_grid
+from cli_art.ascii import _apply_palette, image_to_ascii_grid
 
 
 def _ramp() -> str:
@@ -161,3 +161,81 @@ def test_linear_map_default_ramp() -> None:
     first_char = grid[0][0][0]
     last_char = grid[0][-1][0]
     assert _ramp().index(first_char) < _ramp().index(last_char)
+
+
+def test_apply_palette_no_op() -> None:
+    width, height = 10, 10
+    img = Image.new("RGB", (width, height))
+    for x in range(width):
+        for y in range(height):
+            img.putpixel((x, y), (x * 25, y * 25, 128))
+
+    result = _apply_palette(img)
+    assert result.size == img.size
+    assert result.mode == "RGB"
+
+
+def test_apply_palette_reduces_colors() -> None:
+    width, height = 20, 20
+    img = Image.new("RGB", (width, height))
+    for x in range(width):
+        for y in range(height):
+            img.putpixel((x, y), (x * 12, y * 12, 128))
+
+    result = _apply_palette(img, palette=8)
+    colors = set()
+    pixels = result.load()
+    for x in range(width):
+        for y in range(height):
+            colors.add(pixels[x, y])
+    assert len(colors) <= 8
+
+
+def test_apply_palette_two_colors() -> None:
+    width, height = 10, 10
+    img = Image.new("RGB", (width, height))
+    for x in range(width):
+        for y in range(height):
+            v = int(x / (width - 1) * 255)
+            img.putpixel((x, y), (v, v, v))
+
+    result = _apply_palette(img, palette=2)
+    colors = set()
+    pixels = result.load()
+    for x in range(width):
+        for y in range(height):
+            colors.add(pixels[x, y])
+    assert 1 <= len(colors) <= 2
+
+
+def test_apply_palette_with_file(tmp_path: Path) -> None:
+    ref = tmp_path / "ref.png"
+    ref_img = Image.new("RGB", (4, 1))
+    ref_img.putpixel((0, 0), (255, 0, 0))
+    ref_img.putpixel((1, 0), (0, 255, 0))
+    ref_img.putpixel((2, 0), (0, 0, 255))
+    ref_img.putpixel((3, 0), (255, 255, 0))
+    ref_img.save(ref)
+
+    width, height = 10, 10
+    img = Image.new("RGB", (width, height))
+    for x in range(width):
+        for y in range(height):
+            img.putpixel((x, y), (x * 25, y * 25, 128))
+
+    result = _apply_palette(img, palette_file=str(ref))
+    assert result.size == img.size
+    assert result.mode == "RGB"
+
+
+def test_apply_palette_with_file_and_colors(tmp_path: Path) -> None:
+    ref = tmp_path / "ref.png"
+    ref_img = Image.new("RGB", (4, 1))
+    ref_img.putpixel((0, 0), (255, 0, 0))
+    ref_img.putpixel((1, 0), (0, 0, 255))
+    ref_img.save(ref)
+
+    img = Image.new("RGB", (10, 10), (128, 128, 128))
+    result = _apply_palette(img, palette=4, palette_file=str(ref))
+    assert result.size == img.size
+    assert result.mode == "RGB"

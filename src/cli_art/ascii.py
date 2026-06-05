@@ -9,6 +9,25 @@ CHARS = " .:-=+*#%@"
 AsciiGrid = list[list[tuple[str, tuple[int, int, int]]]]
 
 
+def _apply_palette(
+    img: Image.Image,
+    palette: int | None = None,
+    palette_file: str | Path | None = None,
+) -> Image.Image:
+    """Reduce image colors via quantization or a reference image's palette."""
+    if palette is None and palette_file is None:
+        return img
+
+    if palette_file is not None:
+        ref = Image.open(palette_file).convert("RGB")
+        n = palette if palette is not None else 256
+        pal = ref.quantize(colors=n)
+        return img.quantize(palette=pal).convert("RGB")
+
+    assert palette is not None
+    return img.quantize(colors=palette).convert("RGB")
+
+
 def _image_to_grid(
     img: Image.Image,
     width: int,
@@ -38,12 +57,15 @@ def image_to_ascii_grid(
     invert: bool = False,
     chars: str | None = None,
     mode: str = "linear",
+    palette: int | None = None,
+    palette_file: str | Path | None = None,
 ) -> AsciiGrid:
     active = chars if chars is not None else CHARS
     if invert:
         active = active[::-1]
 
     img = Image.open(path).convert("RGB")
+    img = _apply_palette(img, palette=palette, palette_file=palette_file)
     return _image_to_grid(img, width, active, mode)
 
 

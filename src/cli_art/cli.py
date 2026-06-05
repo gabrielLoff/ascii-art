@@ -10,6 +10,8 @@ from .config import load_config
 from .download import DownloadError, download_image, is_url
 from .themes import THEMES, resolve_chars, theme_names
 
+from .animate import AnimationError, extract_frames, frames_to_grids, play_ansi_animation, render_html_animation
+
 app = typer.Typer()
 
 
@@ -147,6 +149,90 @@ def ascii(
             typer.echo(f"Warning: {e}", err=True)
 
     typer.echo(output_text)
+
+
+@app.command()
+def animate(
+    source: str = typer.Argument(..., help="Path or URL of an animated GIF"),
+    width: int | None = typer.Option(None, "--width", "-w", help="Output width in characters (default: terminal width, fallback 80)"),
+    fps: float | None = typer.Option(None, "--fps", "-f", help="Playback speed in frames per second (default: GIF native timing)"),
+    output: Path | None = typer.Option(
+        None, "--output", "-o", help="Save to HTML file (otherwise play in terminal)"
+    ),
+    invert: bool | None = typer.Option(
+        None, "--invert/--no-invert", help="Invert brightness mapping"
+    ),
+    chars: str | None = typer.Option(
+        None,
+        "--chars",
+        help="Custom character ramp for brightness mapping "
+             "(from dark to bright). Default: ' .:-=+*#%@'",
+    ),
+    theme: str | None = typer.Option(
+        None,
+        "--theme",
+        autocompletion=_complete_theme,
+        help="Named character ramp theme. Cannot be combined with --chars. "
+             "Use 'cli_art themes' to list available themes.",
+    ),
+    mode: str | None = typer.Option(
+        None,
+        "--mode",
+        autocompletion=_complete_mode,
+        help="Character mapping mode: linear, edge, threshold, color-to-char (default: linear)",
+    ),
+    no_color: bool | None = typer.Option(
+        None,
+        "--no-color/--color",
+        help="Output plain text without ANSI color codes",
+    ),
+    max_frames: int | None = typer.Option(
+        None, "--max-frames", help="Maximum number of frames to process (default: 500)",
+    ),
+) -> None:
+    """Convert an animated GIF to a looping ASCII animation."""
+    config = load_config()
+
+    width = width if width is not None else config.get("width", _default_width())
+    fps = fps if fps is not None else config.get("fps")
+    invert = invert if invert is not None else config.get("invert", False)
+    no_color = no_color if no_color is not None else config.get("no_color", False)
+    chars = chars if chars is not None else config.get("chars")
+    theme = theme if theme is not None else config.get("theme")
+    mode = mode if mode is not None else config.get("mode", "linear")
+    max_frames = max_frames if max_frames is not None else config.get("max_frames", 500)
+
+    if chars is not None and len(chars) == 0:
+        raise typer.BadParameter("--chars must not be an empty string")
+
+    try:
+        active_chars = resolve_chars(chars, theme)
+    except ValueError as e:
+        raise typer.BadParameter(str(e))
+
+    try:
+        with _resolve_image(source) as local_path:
+            frames = extract_frames(local_path, max_frames=max_frames)
+    except DownloadError as e:
+        raise typer.BadParameter(str(e))
+
+    if len(frames) == 0:
+        raise typer.BadParameter("No frames found in the source")
+
+    animated = frames_to_grids(frames, width, active_chars, mode)
+
+    if output is not None:
+        suffix = output.suffix.lower()
+        if suffix == ".svg":
+            raise typer.BadParameter("SVG animation output is not supported yet")
+        html = render_html_animation(animated, fps or 10.0)
+        output.write_text(html, encoding="utf-8")
+        typer.echo(f"Saved to {output}")
+    else:
+        try:
+            play_ansi_animation(animated, fps=fps, no_color=no_color)
+        except AnimationError as e:
+            raise typer.BadParameter(str(e))
 
 
 @app.command()

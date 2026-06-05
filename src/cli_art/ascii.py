@@ -9,18 +9,12 @@ CHARS = " .:-=+*#%@"
 AsciiGrid = list[list[tuple[str, tuple[int, int, int]]]]
 
 
-def image_to_ascii_grid(
-    path: str | Path,
-    width: int = 80,
-    invert: bool = False,
-    chars: str | None = None,
-    mode: str = "linear",
+def _image_to_grid(
+    img: Image.Image,
+    width: int,
+    active: str,
+    mode: str,
 ) -> AsciiGrid:
-    active = chars if chars is not None else CHARS
-    if invert:
-        active = active[::-1]
-
-    img = Image.open(path).convert("RGB")
     orig_w, orig_h = img.size
     aspect_ratio = orig_h / orig_w
     height = int(width * aspect_ratio * 0.45)
@@ -36,6 +30,21 @@ def image_to_ascii_grid(
     if mapper is None:
         raise ValueError(f"Unknown mapping mode: {mode!r}")
     return mapper(img, active)
+
+
+def image_to_ascii_grid(
+    path: str | Path,
+    width: int = 80,
+    invert: bool = False,
+    chars: str | None = None,
+    mode: str = "linear",
+) -> AsciiGrid:
+    active = chars if chars is not None else CHARS
+    if invert:
+        active = active[::-1]
+
+    img = Image.open(path).convert("RGB")
+    return _image_to_grid(img, width, active, mode)
 
 
 def render_plain(grid: AsciiGrid) -> str:

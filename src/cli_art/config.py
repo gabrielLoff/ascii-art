@@ -11,7 +11,7 @@ except ImportError:
 
 CONFIG_FILENAME = "config.toml"
 ENV_VAR = "CLI_ART_CONFIG"
-CONFIG_KEYS = frozenset({"width", "invert", "chars", "theme", "mode", "no_color"})
+CONFIG_KEYS = frozenset({"width", "invert", "chars", "theme", "mode", "no_color", "fps", "max_frames"})
 
 
 def _platform_config_dir() -> Path:

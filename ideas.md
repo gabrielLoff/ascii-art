@@ -34,19 +34,6 @@
 
 ---
 
-## Animated GIF Support
-**Convert animated GIFs into frame-by-frame ASCII animations.**
-
-**Why:** GIFs become dynamic, impressive ASCII art — high fun factor and shareability.
-
-**Approach:**
-- Extract frames using Pillow (iterate over `n_frames`)
-- Convert each frame to ASCII grid
-- Output as ANSI animation (clear screen between frames with delay) or as an HTML page with JS frame cycling
-- Could live as a separate subcommand: `cli_art animate`
-
----
-
 ## Aspect Ratio Control (`--aspect`)
 **Let users override the automatic height calculation.**
 
@@ -67,7 +54,6 @@ Currently height = `width * aspect_ratio * 0.45` (hardcoded font aspect correcti
 - Could also add `--height` for explicit row count
 
 ---
-
 
 ## Batch / Directory Processing (`cli_art batch`)
 **Convert an entire directory of images to ASCII art in one command.**

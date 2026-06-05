@@ -44,6 +44,45 @@ def render_ansi(grid: list[list[tuple[str, tuple[int, int, int]]]]) -> str:
     return "\n".join(lines)
 
 
+def _escape_xml(s: str) -> str:
+    return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+
+def render_svg(grid: list[list[tuple[str, tuple[int, int, int]]]]) -> str:
+    if not grid or not grid[0]:
+        return (
+            '<?xml version="1.0" encoding="utf-8"?>\n'
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 0 0" width="0" height="0">\n'
+            '  <rect width="100%" height="100%" fill="#000" />\n'
+            '</svg>'
+        )
+
+    font_size = 14
+    char_width = 9
+    line_height = 16.1
+    svg_width = len(grid[0]) * char_width
+    svg_height = len(grid) * line_height
+
+    lines = [
+        '<?xml version="1.0" encoding="utf-8"?>',
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {svg_width} {svg_height}" width="{svg_width}" height="{svg_height}">',
+        '  <rect width="100%" height="100%" fill="#000" />',
+        f'  <g font-family="monospace" font-size="{font_size}" xml:space="preserve" style="line-height:1">',
+    ]
+
+    for i, row in enumerate(grid):
+        y = i * line_height + font_size
+        tspans = "".join(
+            f'<tspan fill="rgb({r},{g},{b})">{_escape_xml(char)}</tspan>'
+            for char, (r, g, b) in row
+        )
+        lines.append(f'    <text x="0" y="{y:.1f}">{tspans}</text>')
+
+    lines.append("  </g>")
+    lines.append("</svg>")
+    return "\n".join(lines)
+
+
 def render_html(grid: list[list[tuple[str, tuple[int, int, int]]]]) -> str:
     lines = [
         '<!DOCTYPE html>',

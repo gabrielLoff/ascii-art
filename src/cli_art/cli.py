@@ -6,7 +6,7 @@ from typing import Optional
 
 import typer
 
-from .ascii import CHARS, image_to_ascii_grid, render_ansi, render_html
+from .ascii import CHARS, image_to_ascii_grid, render_ansi, render_html, render_svg
 from .download import DownloadError, download_image, is_url
 from .themes import THEMES, resolve_chars, theme_names
 
@@ -54,7 +54,7 @@ def ascii(
     source: str = typer.Argument(..., help="Path or URL of the image"),
     width: int = typer.Option(_default_width, "--width", "-w", help="Output width in characters"),
     output: Optional[Path] = typer.Option(
-        None, "--output", "-o", help="Save to file (.html for HTML, otherwise ANSI text)"
+        None, "--output", "-o", help="Save to file (.html / .svg for those formats, otherwise ANSI text)"
     ),
     invert: bool = typer.Option(
         False, "--invert", help="Invert brightness mapping"
@@ -89,8 +89,11 @@ def ascii(
         raise typer.BadParameter(str(e))
 
     if output is not None:
-        if output.suffix == ".html":
+        suffix = output.suffix.lower()
+        if suffix == ".html":
             content = render_html(grid)
+        elif suffix == ".svg":
+            content = render_svg(grid)
         else:
             content = render_ansi(grid)
         output.write_text(content, encoding="utf-8")

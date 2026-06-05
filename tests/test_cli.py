@@ -180,6 +180,60 @@ def test_ascii_no_color_with_output(tmp_path: Path, gradient_png: Path) -> None:
     assert "\033[" not in content
 
 
+def test_ascii_with_copy(gradient_png) -> None:
+    from unittest.mock import patch
+
+    copied_text = None
+
+    def fake_copy(text: str) -> None:
+        nonlocal copied_text
+        copied_text = text
+
+    with patch("pyperclip.copy", side_effect=fake_copy):
+        result = runner.invoke(app, ["ascii", str(gradient_png), "--copy"])
+    assert result.exit_code == 0
+    assert "Copied to clipboard" in result.stdout
+    assert copied_text is not None
+
+
+def test_ascii_with_copy_and_output(tmp_path, gradient_png) -> None:
+    from unittest.mock import patch
+
+    out_txt = tmp_path / "out.txt"
+    copied_text = None
+
+    def fake_copy(text: str) -> None:
+        nonlocal copied_text
+        copied_text = text
+
+    with patch("pyperclip.copy", side_effect=fake_copy):
+        result = runner.invoke(
+            app, ["ascii", str(gradient_png), "--copy", "--output", str(out_txt)]
+        )
+    assert result.exit_code == 0
+    assert "Copied to clipboard" in result.stdout
+    assert "Saved to" in result.stdout
+    assert copied_text is not None
+    assert out_txt.exists()
+
+
+def test_ascii_with_copy_no_color(gradient_png) -> None:
+    from unittest.mock import patch
+
+    copied_text = None
+
+    def fake_copy(text: str) -> None:
+        nonlocal copied_text
+        copied_text = text
+
+    with patch("pyperclip.copy", side_effect=fake_copy):
+        result = runner.invoke(
+            app, ["ascii", str(gradient_png), "--copy", "--no-color"]
+        )
+    assert result.exit_code == 0
+    assert "\033[" not in copied_text
+
+
 def test_render_plain() -> None:
     from cli_art.ascii import render_plain
 

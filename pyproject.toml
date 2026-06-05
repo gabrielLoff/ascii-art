@@ -17,8 +17,12 @@ dependencies = [
 cli_art = "cli_art.cli:app"
 
 [project.optional-dependencies]
+clipboard = [
+    "pyperclip>=1.8.0",
+]
 dev = [
     "pytest>=8.0.0",
+    "pyperclip>=1.8.0",
 ]
 
 [tool.pytest.ini_options]

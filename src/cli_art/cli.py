@@ -5,6 +5,7 @@ from collections.abc import Iterator
 import typer
 
 from .ascii import CHARS, image_to_ascii_grid, render_ansi, render_html, render_plain, render_svg
+from .clipboard import ClipboardError, copy_to_clipboard
 from .config import load_config
 from .download import DownloadError, download_image, is_url
 from .themes import THEMES, resolve_chars, theme_names
@@ -94,6 +95,12 @@ def ascii(
         "--no-color/--color",
         help="Output plain text without ANSI color codes",
     ),
+    copy: bool | None = typer.Option(
+        None,
+        "--copy",
+        "-c",
+        help="Copy the rendered ASCII art to the system clipboard",
+    ),
 ) -> None:
     """Convert an image to color ASCII art."""
     config = load_config()
@@ -119,7 +126,7 @@ def ascii(
     except DownloadError as e:
         raise typer.BadParameter(str(e))
 
-    text_renderer = render_plain if no_color else render_ansi
+    output_text = render_plain(grid) if no_color else render_ansi(grid)
 
     if output is not None:
         suffix = output.suffix.lower()
@@ -128,11 +135,18 @@ def ascii(
         elif suffix == ".svg":
             content = render_svg(grid)
         else:
-            content = text_renderer(grid)
+            content = output_text
         output.write_text(content, encoding="utf-8")
         typer.echo(f"Saved to {output}")
 
-    typer.echo(text_renderer(grid))
+    if copy:
+        try:
+            copy_to_clipboard(output_text)
+            typer.echo("Copied to clipboard")
+        except ClipboardError as e:
+            typer.echo(f"Warning: {e}", err=True)
+
+    typer.echo(output_text)
 
 
 @app.command()

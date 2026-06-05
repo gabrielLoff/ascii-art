@@ -38,6 +38,11 @@ def image_to_ascii_grid(
     return mapper(img, active)
 
 
+def render_plain(grid: AsciiGrid) -> str:
+    lines = ["".join(char for char, _ in row) for row in grid]
+    return "\n".join(lines)
+
+
 def render_ansi(grid: AsciiGrid) -> str:
     lines: list[str] = []
     for row in grid:

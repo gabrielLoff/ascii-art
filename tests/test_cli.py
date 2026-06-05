@@ -163,6 +163,40 @@ def test_ascii_mode_with_theme(gradient_png: Path) -> None:
     assert result.exit_code == 0
 
 
+def test_ascii_no_color(gradient_png: Path) -> None:
+    result = runner.invoke(app, ["ascii", str(gradient_png), "--no-color"])
+    assert result.exit_code == 0
+    assert "\033[" not in result.stdout
+
+
+def test_ascii_no_color_with_output(tmp_path: Path, gradient_png: Path) -> None:
+    out_txt = tmp_path / "out.txt"
+    result = runner.invoke(
+        app, ["ascii", str(gradient_png), "--no-color", "--output", str(out_txt)]
+    )
+    assert result.exit_code == 0
+    content = out_txt.read_text(encoding="utf-8")
+    assert content
+    assert "\033[" not in content
+
+
+def test_render_plain() -> None:
+    from cli_art.ascii import render_plain
+
+    grid = [
+        [("@", (255, 0, 0)), ("#", (0, 255, 0))],
+        [(".", (0, 0, 255)), (" ", (128, 128, 128))],
+    ]
+    result = render_plain(grid)
+    assert result == "@#\n. "
+
+
+def test_render_plain_empty_grid() -> None:
+    from cli_art.ascii import render_plain
+
+    assert render_plain([]) == ""
+
+
 def test_default_width_returns_terminal_columns() -> None:
     import os
     from unittest.mock import patch

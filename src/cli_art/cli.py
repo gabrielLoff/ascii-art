@@ -4,7 +4,7 @@ from pathlib import Path
 from collections.abc import Iterator
 import typer
 
-from .ascii import CHARS, image_to_ascii_grid, render_ansi, render_html, render_svg
+from .ascii import CHARS, image_to_ascii_grid, render_ansi, render_html, render_plain, render_svg
 from .download import DownloadError, download_image, is_url
 from .themes import THEMES, resolve_chars, theme_names
 
@@ -88,6 +88,11 @@ def ascii(
         autocompletion=_complete_mode,
         help="Character mapping mode: linear, edge, threshold, color-to-char",
     ),
+    no_color: bool = typer.Option(
+        False,
+        "--no-color",
+        help="Output plain text without ANSI color codes",
+    ),
 ) -> None:
     """Convert an image to color ASCII art."""
     if chars is not None and len(chars) == 0:
@@ -104,6 +109,8 @@ def ascii(
     except DownloadError as e:
         raise typer.BadParameter(str(e))
 
+    text_renderer = render_plain if no_color else render_ansi
+
     if output is not None:
         suffix = output.suffix.lower()
         if suffix == ".html":
@@ -111,11 +118,11 @@ def ascii(
         elif suffix == ".svg":
             content = render_svg(grid)
         else:
-            content = render_ansi(grid)
+            content = text_renderer(grid)
         output.write_text(content, encoding="utf-8")
         typer.echo(f"Saved to {output}")
 
-    typer.echo(render_ansi(grid))
+    typer.echo(text_renderer(grid))
 
 
 @app.command()

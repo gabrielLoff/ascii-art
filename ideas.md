@@ -51,40 +51,6 @@
 
 ---
 
-## Luminance-to-Character Mapping Modes (`--mode`)
-**Offer different algorithms for mapping pixels to characters.**
-
-**Why:** The current linear brightness → char index is one approach. Alternatives like edge detection, threshold posterization, or hue-based mapping produce entirely different art styles from the same image.
-
-**Suggested modes:**
-- **Linear** (default) — current `brightness / 255 * (len - 1)` behavior
-- **Edge** — Sobel edge detection → characters for outlines (high-contrast, sketch-like)
-- **Threshold** — pure black/white posterization with two characters
-- **Color-to-char** — map hue angle to different characters
-
-**Approach:**
-- Add `--mode` option with mode names
-- Each mode is a separate conversion path in `image_to_ascii_grid` or a new function
-- Linear remains the default for backward compatibility
-
-**Considerations:**
-- Could make the CLI surface complex
-- Worth as an extension after core is stable
-
----
-
-## Plain ASCII Output (`--no-color`)
-**Add a flag to output clean, shareable plain text without ANSI color codes.**
-
-**Why:** Enables use in markdown code blocks, READMEs, terminals without true color support, or any environment where ANSI codes are unwanted.
-
-**Approach:**
-- Add `--no-color` / `--plain` flag to the `ascii` command
-- Add a `render_plain()` function in `ascii.py` that outputs characters only (no ANSI escapes)
-- When `--no-color` is set, call `render_plain()` instead of `render_ansi()`
-
----
-
 ## Animated GIF Support
 **Convert animated GIFs into frame-by-frame ASCII animations.**
 
